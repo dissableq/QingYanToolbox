@@ -1,0 +1,75 @@
+name: Windows checks and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Check version consistency
+        run: python scripts/release.py check
+      - name: Run tests without Office or printer dependencies
+        run: >-
+          python verify.py ci test_engine.py test_extra.py test_flow.py
+          test_regress.py test_regress2.py test_installer_args.py
+          test_gui_integration.py test_offline.py test_quality.py
+          test_runtime_quality.py test_v33_regressions.py test_v34.py
+      - name: Save test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-test-results
+          path: |
+            .verification_data/ci/*.log
+            .verification_data/ci/summary.json
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: checks
+    runs-on: windows-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install build dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Build and verify release
+        run: python scripts/release.py build --tag $env:GITHUB_REF_NAME
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $assets = @(Get-ChildItem -LiteralPath release -File | ForEach-Object FullName)
+          gh release create $env:GITHUB_REF_NAME @assets --verify-tag --title "青雁批量工具箱 $env:GITHUB_REF_NAME" --notes-file "docs/releases/$env:GITHUB_REF_NAME.md"
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub Release publication failed' }
