@@ -13,6 +13,8 @@
 
 `scripts/publish.ps1 -DocumentationOnly -Message '更新说明'` 用于不改变产品版本的文档更新。
 
+如果 Git 传输不通但 GitHub API 可用，可加 `-Transport api`。备用方式使用同一 Git 凭据，逐个校验文件树、提交和标签的对象 ID，只有一致且能快进时才更新远端；不会覆盖已有标签。API 更新分支和标签是两次操作，若中途失败，可用 `python scripts/push_api.py --tag vX.Y.Z` 重试。
+
 发布失败时检查 Actions 日志并修复；已经发布的版本不重写标签。不要强制推送覆盖远端历史。登录过期时使用 GitHub CLI 的 `gh auth login`，不把令牌写进仓库。
 
 ## 本地构建
