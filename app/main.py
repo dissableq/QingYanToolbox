@@ -24,7 +24,7 @@ from app.theme import Theme
 from engine.store import ParamStore, data_dir
 
 APP_NAME = '青雁批量工具箱'
-APP_VERSION = '3.4.0'
+APP_VERSION = '3.4.1'
 
 
 def _icon_path():

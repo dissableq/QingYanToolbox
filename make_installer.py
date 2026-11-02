@@ -22,7 +22,7 @@ import zipfile
 
 APP_NAME = '青雁批量工具箱'
 APP_DIR = '青雁批量工具箱v3'
-VERSION = '3.4.0'
+VERSION = '3.4.1'
 
 
 def _run(cmd, **kw):
@@ -169,4 +169,10 @@ def main() -> int:
 
 
 if __name__ == '__main__':
+    # English Windows commonly defaults redirected output to cp1252.
+    # Build logs and paths contain Chinese, so keep all build processes UTF-8.
+    os.environ.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     sys.exit(main())

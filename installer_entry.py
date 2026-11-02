@@ -33,7 +33,7 @@ import zipfile
 
 APP_NAME = '青雁批量工具箱'
 APP_DIR = '青雁批量工具箱v3'
-VERSION = '3.4.0'
+VERSION = '3.4.1'
 INSTALL_ROOT_DEFAULT = 'Programs'
 
 MANIFEST = '.qingyan-install.json'

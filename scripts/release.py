@@ -17,7 +17,10 @@ VERSION_FILES = {'app/main.py': 'APP_VERSION', 'installer_entry.py': 'VERSION',
 
 
 def run(arguments, **kwargs):
-    return subprocess.run(arguments, cwd=ROOT, check=True, **kwargs)
+    environment = os.environ.copy()
+    environment.update(kwargs.pop('env', {}))
+    environment.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    return subprocess.run(arguments, cwd=ROOT, check=True, env=environment, **kwargs)
 
 
 def version(tag=None):
@@ -136,4 +139,7 @@ def main():
 
 
 if __name__ == '__main__':
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     main()
