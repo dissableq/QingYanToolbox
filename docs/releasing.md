@@ -21,9 +21,11 @@
 
 ```powershell
 python -m pip install -r requirements-build.txt
-python scripts/release.py check --tag v3.4.0
-python scripts/release.py build --tag v3.4.0
+python scripts/release.py check
+python scripts/release.py build
 ```
+
+默认使用当前源码中的产品版本；需要校验发布标签时，可追加 `--tag vX.Y.Z`，标签必须与源码版本一致。
 
 必须在已提交且工作区干净的源码中构建，源码包由当前 Git 提交生成，避免安装包与源码不一致。产物输出到 `release/`。构建会从 PyInstaller 产物运行自检，并将许可证放进免安装包与安装负载。
 
